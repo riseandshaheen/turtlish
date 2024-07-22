@@ -27,3 +27,7 @@ Example JSON input string:
 ```
 {"method":"draw", "code": "for i in range(50): \n\tturtle.circle(100,360) \n\tturtle.left(5)"}
 ```
+
+## Samples
+![sample01](./sample01.png)
+![sample02](./sample02.png)
