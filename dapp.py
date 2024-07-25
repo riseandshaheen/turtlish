@@ -17,18 +17,37 @@ def handle_advance(data):
     payload = hex_to_str(data["payload"])
     logger.info(f"Payload: {payload}")
 
-    payload = json.loads(payload)
+    try:
+        payload = json.loads(payload)
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON decode error: {e}")
+        response = requests.post(rollup_server + "/report", json={"payload": str_to_hex("Invalid JSON format")})
+        return "reject"
+
     method = payload.get("method", {})
 
     if method == "draw":
-        # run turtle magic with user code {"method":"draw", "code":"user algorithm"}
+
         user_code = payload.get("code", {})
-        server_generated_base64 = draw_with_turtle_to_base64(user_code)
-        logger.info(f"Image Data: {server_generated_base64}")
-        response = requests.post(rollup_server + "/report", json={"payload": str_to_hex(server_generated_base64)})
+
+        if not user_code:
+            logger.error("No code provided in payload")
+            response = requests.post(rollup_server + "/report", json={"payload": str_to_hex("User code is NOT provided in payload")})
+            return "reject"
+
+        try:
+            server_generated_base64 = draw_with_turtle_to_base64(user_code)
+            logger.info(f"Image Data: {server_generated_base64}")
+            response = requests.post(rollup_server + "/report", json={"payload": str_to_hex(server_generated_base64)})
+        except Exception as e:
+            logger.error(f"Error in user code execution: {e}")
+            response = requests.post(rollup_server + "/report", json={"payload": str_to_hex(f"Error executing draw code: {e}")})
+            return "reject"
+
     else:
         # reject the input
-        logger.info("Input method is not defined")
+        logger.warn("Invalid method in the input JSON string")
+        response = requests.post(rollup_server + "/report", json={"payload": str_to_hex("Invalid method in the input JSON string")})
         return "reject"
 
     return "accept"

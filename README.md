@@ -28,6 +28,17 @@ Example JSON input string:
 {"method":"draw", "code": "for i in range(50): \n\tturtle.circle(100,360) \n\tturtle.left(5)"}
 ```
 
+## Available commands
+- Simple Movement - `forward(value)` `backward(value)`  `right(degrees)`  `left(degrees)`  `penup`  `pendown`  `goto`  `home`  `setheading` 
+- Advance Movement -
+ `goto(x-value, y-value)` `setx(value)` `sety(value)`
+
+- Shapes - `circle(radius, degrees)`
+
+- Drawing - `begin_fill`  `end_fill`  
+
+- Pen - `pensize(value)`
+
 ## Samples
 ![sample01](./sample01.png)
 ![sample02](./sample02.png)

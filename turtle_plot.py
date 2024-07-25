@@ -33,14 +33,29 @@ class MatplotlibTurtle:
         )
         self._update_position(new_position)
 
+    def fd(self, distance):
+        self.forward(distance)
+
     def backward(self, distance):
         self.forward(-distance)
+    
+    def bk(self, distance):
+        self.backward(distance)
+    
+    def back(self, distance):
+        self.backward(distance)
 
     def right(self, angle):
         self.current_angle -= angle
+    
+    def rt(self, angle):
+        self.right(angle)
 
     def left(self, angle):
         self.current_angle += angle
+    
+    def lt(self, angle):
+        self.left(angle)
 
     def penup(self):
         self.pen = False
