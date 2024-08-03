@@ -4,10 +4,16 @@ import numpy as np
 from PIL import Image
 from io import BytesIO
 import base64
+import re
 
-class MatplotlibTurtle:
-    def __init__(self, ax):
-        self.ax = ax
+class Turtlish:
+    def __init__(self):
+        self.fig, self.ax = plt.subplots()
+        self.ax.set_xlim(-250, 250)
+        self.ax.set_ylim(-250, 250)
+        self.ax.set_aspect('equal')
+        self.ax.axis('off')
+
         self.current_position = (0,0)
         self.current_angle = 0
         self.heading = 0.0
@@ -99,6 +105,12 @@ class MatplotlibTurtle:
 
     def goto(self, x, y):
         self._update_position((x, y))
+    
+    def setx(self, x):
+        self.goto(x, self.current_position[1])
+
+    def sety(self, y):
+        self.goto(self.current_position[0], y)
 
     def setheading(self, angle):
         self.heading = angle
@@ -106,18 +118,35 @@ class MatplotlibTurtle:
     def home(self):
         self.goto(0, 0)
         self.setheading(0)
+    
+    def get_figure_and_ax(self):
+        return self.fig, self.ax
+
+def find_turtle_instance(code):
+    # Look for a line that defines a MatplotlibTurtle instance
+    match = re.search(r'(\w+)\s*=\s*Turtlish\(\)', code)
+    if match:
+        return match.group(1)
+    return None
 
 def draw_with_turtle_to_base64(code):
-    fig, ax = plt.subplots()
-    ax.set_xlim(-400, 400)
-    ax.set_ylim(-400, 400)
-    ax.set_aspect('equal')
 
-    turtle = MatplotlibTurtle(ax)
+    # Check if the code includes MatplotlibTurtle initialization
+    if find_turtle_instance(code) is None:
+        raise ValueError("No Turtlish instance found in the provided code.")
 
-    exec(code, {'turtle': turtle})
+    exec(code, globals())
 
-    ax.axis('off')
+    # find the instance of Turtlish from global variables
+    turtle_instance = next(
+        (obj for obj in globals().values() if isinstance(obj, Turtlish)),
+        None
+    )
+
+    if turtle_instance is None:
+        raise ValueError("No Turtlish instance found in the provided code.")
+
+    fig, ax = turtle_instance.get_figure_and_ax()
 
     # save the figure to a BytesIO object
     buf = BytesIO()
