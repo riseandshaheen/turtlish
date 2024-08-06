@@ -44,7 +44,8 @@ def handle_advance(data):
 
     method = payload.get("method", {})
 
-    # set nft contract address
+    # set nft contract address 
+    # TODO: only dapp owner should update this
     if method == "set_nft_address": # {"method":"set_nft_address", "address":"0x1234..."}
         global NFT_CONTRACT_ADDRESS
         NFT_CONTRACT_ADDRESS = payload.get("address", {})

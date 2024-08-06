@@ -8,7 +8,7 @@ import re
 
 class Turtlish:
     def __init__(self):
-        self.fig, self.ax = plt.subplots()
+        self.fig, self.ax = plt.subplots(figsize=(5, 5), dpi=100)
         self.ax.set_xlim(-250, 250)
         self.ax.set_ylim(-250, 250)
         self.ax.set_aspect('equal')
@@ -20,6 +20,7 @@ class Turtlish:
         self.pen = True
         self.color = 'black'
         self.width = 0.7
+        self.fig.tight_layout(pad=0)
 
     def _update_position(self, new_position):
         if self.pen:
@@ -131,9 +132,16 @@ def find_turtle_instance(code):
 
 def draw_with_turtle_to_base64(code):
 
-    # Check if the code includes MatplotlibTurtle initialization
+    # check if the code includes MatplotlibTurtle initialization
     if find_turtle_instance(code) is None:
         raise ValueError("No Turtlish instance found in the provided code.")
+    
+    # clear any previous global state related to Turtlish
+    if 'turtle_instance' in globals():
+        del globals()['turtle_instance']
+    for name in list(globals().keys()):
+        if not name.startswith('_') and name not in {'draw_with_turtle_to_base64', 'Turtlish', 'find_turtle_instance', 're', 'plt', 'np', 'Image', 'BytesIO', 'base64'}:
+            del globals()[name]
 
     exec(code, globals())
 
