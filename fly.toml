@@ -1,0 +1,35 @@
+app = "turtlish-node"
+
+[build]
+image = "registry.fly.io/turtlish-node"
+
+[http_service]
+internal_port = 10000
+force_https = true
+
+[http_service.concurrency]
+type = "requests"
+soft_limit = 200
+hard_limit = 250
+
+[[http_service.checks]]
+grace_period = "10s"
+interval = "30s"
+method = "GET"
+timeout = "5s"
+path = "/healthz"
+
+[[vm]]
+size = "shared-cpu-1x"
+memory = "2gb"
+
+[env]
+CARTESI_BLOCKCHAIN_FINALITY_OFFSET = "1"
+CARTESI_BLOCKCHAIN_ID = "84532"
+CARTESI_CONTRACTS_APPLICATION_ADDRESS = "0x11780dFA9c0B1F8C4889BdE71420725476d9e205"
+CARTESI_CONTRACTS_AUTHORITY_ADDRESS = "0xD954941E8231B13CfDF31E415cF98B030BE6B7bd"
+CARTESI_CONTRACTS_HISTORY_ADDRESS = "0x0870a19673a1C43ED4343ca07799d682a505Fa8F"
+CARTESI_CONTRACTS_INPUT_BOX_ADDRESS = "0x59b22D57D4f067708AB0c00552767405926dc768"
+CARTESI_CONTRACTS_INPUT_BOX_DEPLOYMENT_BLOCK_NUMBER = "8688714"
+CARTESI_EPOCH_LENGTH = "43200"
+

@@ -5,6 +5,7 @@ from PIL import Image
 from io import BytesIO
 import base64
 import re
+import ast
 
 class Turtlish:
     def __init__(self):
@@ -134,13 +135,34 @@ def draw_with_turtle_to_base64(code):
 
     # check if the code includes MatplotlibTurtle initialization
     if find_turtle_instance(code) is None:
-        raise ValueError("No Turtlish instance found in the provided code.")
+        raise ValueError("No Turtlish instance found in the provided code. Make sure to correctly instantiate Turtlish class.")
+    
+    # check and restrict imports, only random module is allowed
+    code_ast = ast.parse(code)
+    for node in ast.walk(code_ast):
+        if isinstance(node, (ast.Import, ast.ImportFrom)):
+            for alias in (node.names if isinstance(node, ast.Import) else [node]):
+                if alias.name != 'random':
+                    raise ValueError(f"Import of {alias.name} is not allowed.")
+    
+    # check for random seed initialisation
+    if any(isinstance(node, ast.Import) and any(alias.name == 'random' for alias in node.names) for node in ast.walk(code_ast)):
+        seed_set = any(
+            isinstance(node, ast.Expr) and
+            isinstance(node.value, ast.Call) and
+            isinstance(node.value.func, ast.Attribute) and
+            node.value.func.value.id == 'random' and
+            node.value.func.attr == 'seed'
+            for node in ast.walk(code_ast)
+        )
+        if not seed_set:
+            raise ValueError("Random seed must be set when using random.")
     
     # clear any previous global state related to Turtlish
     if 'turtle_instance' in globals():
         del globals()['turtle_instance']
     for name in list(globals().keys()):
-        if not name.startswith('_') and name not in {'draw_with_turtle_to_base64', 'Turtlish', 'find_turtle_instance', 're', 'plt', 'np', 'Image', 'BytesIO', 'base64'}:
+        if not name.startswith('_') and name not in {'draw_with_turtle_to_base64', 'Turtlish', 'find_turtle_instance', 'ast', 're', 'plt', 'np', 'Image', 'BytesIO', 'base64'}:
             del globals()[name]
 
     exec(code, globals())
